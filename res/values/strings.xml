@@ -4,5 +4,15 @@
     <string name="app_name">BlogReader</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="no_items">No items to display!</string>
+    
+    <string-array name="android_names">
+        <item>Android beta</item>
+        <item>Android 1.0</item>
+        <item>Android 1.2</item>
+        <item>Cupcake</item>
+        <item>Donut</item>
+        <item>Eclair</item>        
+    </string-array>
 
 </resources>
