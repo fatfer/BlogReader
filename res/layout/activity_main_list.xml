@@ -11,5 +11,12 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true" >
     </ListView>
-
+    
+    <TextView android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="No items to display!" />
 </RelativeLayout>
+ 
