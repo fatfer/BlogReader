@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -85,8 +86,12 @@ public class MainListActivity extends ListActivity {
     
 	public void updateList() {
 		if(mBlogData == null){
-			
-			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.error_title));
+			builder.setMessage(getString(R.string.error_message));
+			builder.setPositiveButton(android.R.string.ok, null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
 		}
 		else{
 			try{
@@ -117,9 +122,9 @@ public class MainListActivity extends ListActivity {
 		    JSONObject jsonResponse = null;
 		    StringBuilder builder = new StringBuilder();
 		    HttpClient client = new DefaultHttpClient();
-		    HttpGet httpget = new HttpGet("http://blog.teamtreehouse.com/api/get_recent_summary/?count=" + NUMBER_OF_POSTS);
-
+		    
 		    try {
+		    	HttpGet httpget = new HttpGet("http://blog.teamtreehouse.com/api/get_recent_summary/?count=" + NUMBER_OF_POSTS);
 		        HttpResponse response = client.execute(httpget);
 		        StatusLine statusLine = response.getStatusLine();
 		        responseCode = statusLine.getStatusCode();

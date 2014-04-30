@@ -14,5 +14,7 @@
         <item>Donut</item>
         <item>Eclair</item>        
     </string-array>
+    <string name="error_title">Oops! Sorry!</string>
+    <string name="error_message">There was an error getting data from the blog.</string>
 
 </resources>
