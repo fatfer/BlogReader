@@ -1,12 +1,18 @@
 package com.example.blogreader;
 
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.ListActivity;
 import android.content.Context;
@@ -24,6 +30,7 @@ public class MainListActivity extends ListActivity {
 	protected String[] mBlogPostTitles;
 	public static final int NUMBER_OF_POSTS = 20;
 	public static final String TAG  = MainListActivity.class.getSimpleName();
+	protected JSONObject mBlogData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,40 +82,66 @@ public class MainListActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
     
-    private class GetBlogPostsTask extends AsyncTask<Object, Void, String> {
+    
+	public void updateList() {
+		if(mBlogData == null){
+			
+			
+		}
+		else{
+			try{
+				Log.d(TAG, mBlogData.toString(2));
+			}catch(JSONException e){
+				Log.e(TAG, "Exception caught!", e);
+			}
+		}
+	}
+    
+    private class GetBlogPostsTask extends AsyncTask<Object, Void, JSONObject> {
 
 		@Override
-		protected String doInBackground(Object... arg0) {
-			int responseCode = -1;
-	        try{
-	            URL blogFeedUrl = new URL("http://blog.teamtreehouse.com/api/get_recent_summary/?count="+NUMBER_OF_POSTS);
-	            HttpURLConnection connection = (HttpURLConnection) blogFeedUrl.openConnection();
-	            connection.connect();
-	            
-	            responseCode = connection.getResponseCode();
-	            if(responseCode == HttpURLConnection.HTTP_OK){
-	            	InputStream inputStream = connection.getInputStream();
-	            	Reader reader = new InputStreamReader(inputStream);
-	            	int contentLength = connection.getContentLength();
-	            	char[] charArray = new char[contentLength];
-	            	reader.read(charArray);
-	            	String responseData = new String(charArray);
-	            	Log.v(TAG,responseData);
-	            }else{
-	            	Log.i(TAG, "Unsuccessful HTTP Response Code: " + responseCode);
-	            }
-	        }
-	        catch(MalformedURLException e){
-	        	Log.e(TAG,"Exception caught:",e);
-	        }
-	        catch(IOException e){
-	        	Log.e(TAG,"Exception caught:",e);
-	        }
-	        catch(Exception e){
-	        	Log.e(TAG,"Exception caught:",e);
-	        }
-	        
-	        return "Code: " + responseCode;
+		protected JSONObject doInBackground(Object... params) {
+		    int responseCode = -1;
+		    JSONObject jsonResponse = null;
+		    StringBuilder builder = new StringBuilder();
+		    HttpClient client = new DefaultHttpClient();
+		    HttpGet httpget = new HttpGet("http://blog.teamtreehouse.com/api/get_recent_summary/?count=" + NUMBER_OF_POSTS);
+
+		    try {
+		        HttpResponse response = client.execute(httpget);
+		        StatusLine statusLine = response.getStatusLine();
+		        responseCode = statusLine.getStatusCode();
+
+		        if (responseCode == HttpURLConnection.HTTP_OK) {
+		            HttpEntity entity = response.getEntity();
+		            InputStream content = entity.getContent();
+		            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+		            String line;
+		            while((line = reader.readLine()) != null){
+		                builder.append(line);
+		            }
+
+		            jsonResponse = new JSONObject(builder.toString());
+		        }
+		        else {
+		            Log.i(TAG, String.format("Unsuccessful HTTP response code: %d", responseCode));
+		        }
+		    }
+		    catch (JSONException e) {
+		    	Log.e(TAG, "Exception caught: ", e);
+		    }
+		    catch (Exception e) {
+		    	Log.e(TAG, "Exception caught: ", e);
+		    }           
+
+		    return jsonResponse;
+		}   
+		
+		@Override
+		protected void onPostExecute(JSONObject result){
+			
+			mBlogData = result;
+			updateList();
 		}
     	
     	
