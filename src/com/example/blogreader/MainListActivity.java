@@ -26,7 +26,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainListActivity extends ListActivity {
@@ -35,13 +38,17 @@ public class MainListActivity extends ListActivity {
 	public static final int NUMBER_OF_POSTS = 20;
 	public static final String TAG  = MainListActivity.class.getSimpleName();
 	protected JSONObject mBlogData;
+	protected ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_list);
         
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+        
         if (isNetworkAvailable()){
+        	mProgressBar.setVisibility(View.VISIBLE);
         	GetBlogPostsTask getBlogPostsTask = new GetBlogPostsTask();
         	getBlogPostsTask.execute();
         }
@@ -84,14 +91,10 @@ public class MainListActivity extends ListActivity {
     }
     
     
-	public void updateList() {
+	public void handleBlogResponse() {
+       	mProgressBar.setVisibility(View.INVISIBLE);
 		if(mBlogData == null){
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.error_title));
-			builder.setMessage(getString(R.string.error_message));
-			builder.setPositiveButton(android.R.string.ok, null);
-			AlertDialog dialog = builder.create();
-			dialog.show();
+			updateDisplayForError();
 		}
 		else{
 			try{
@@ -112,6 +115,18 @@ public class MainListActivity extends ListActivity {
 				Log.e(TAG, "Exception caught!", e);
 			}
 		}
+	}
+
+	private void updateDisplayForError() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.error_title));
+		builder.setMessage(getString(R.string.error_message));
+		builder.setPositiveButton(android.R.string.ok, null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		
+		TextView emptyTextView = (TextView) getListView().getEmptyView();
+		emptyTextView.setText(getString(R.string.no_items));
 	}
     
     private class GetBlogPostsTask extends AsyncTask<Object, Void, JSONObject> {
@@ -158,7 +173,7 @@ public class MainListActivity extends ListActivity {
 		protected void onPostExecute(JSONObject result){
 			
 			mBlogData = result;
-			updateList();
+			handleBlogResponse();
 		}
     	
     	
